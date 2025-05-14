@@ -282,13 +282,6 @@ def extract_audio_features(manifest_filepath: str, cfg: DictConfig, record_fn: C
                     processed_signal = processed_signal.cpu()
                     outpath = os.path.join(out_dir, file_list[i] + ".pt")
                     outpath = str(Path(outpath).absolute())
-# Security fix: Using load_state_dict instead of direct loading to prevent arbitrary code execution
-# If the checkpoint is a state_dict directly
-if not isinstance(checkpoint, dict) or "state_dict" not in checkpoint:
-    model.load_state_dict(checkpoint)
-else:
-    # If the checkpoint contains a state_dict key
-    model.load_state_dict(checkpoint["state_dict"])
                     torch.save(processed_signal, outpath)
                     manifest_data[i]["feature_file"] = outpath
                     del test_batch
