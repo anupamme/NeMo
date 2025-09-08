@@ -1,0 +1,18 @@
+--- speech_to_text_with_vad.py
++++ speech_to_text_with_vad.py
+@@ -282,7 +282,14 @@
+     # setup ASR model
+     if args.asr_model.endswith('.nemo'):
+         logging.info(f"Using local ASR model from {args.asr_model}")
+-        model = torch.load(args.asr_model)
++        # Safe loading using state_dict instead of pickle-based torch.load
++        asr_model_cfg = ASRModel.restore_from(args.asr_model, return_config=True)
++        model_name = asr_model_cfg.target
++        if model_name == 'EncDecCTCModel':
++            model = EncDecCTCModel.restore_from(args.asr_model)
++        else:
++            # Handle other model types as needed
++            model = ASRModel.restore_from(args.asr_model)
+     else:
+         logging.info(f"Using NGC cloud ASR model {args.asr_model}")
+         model = ASRModel.from_pretrained(args.asr_model)
